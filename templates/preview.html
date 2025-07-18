@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preview PDF</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        iframe {
+            width: 100%;
+            height: 700px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container my-5">
+        <h3 class="mb-4 text-center">📄 Preview of Learning Records</h3>
+
+        <iframe src="{{ url_for('generate_pdf') }}"></iframe>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <a href="{{ url_for('generate_pdf') }}" class="btn btn-success">⬇️ Download PDF</a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">← Back to Add More Topics</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (for future use if needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
