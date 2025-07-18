@@ -162,5 +162,86 @@ def generate_pdf():
     response.headers['Content-Disposition'] = 'inline; filename=Learning_Records.pdf'
     return response
 
+#Assignment Logic 
+
+@app.route('/assignment', methods=['GET', 'POST'])
+def assignment():
+    if 'assignments' not in session:
+        session['assignments'] = []
+
+    if request.method == 'POST':
+        questions_raw = request.form['questions'].strip()
+        word_limit = request.form['word_limit'].strip()
+
+        questions = [q.strip() for q in questions_raw.split('\n') if q.strip()]
+        responses = []
+
+        for q in questions:
+            prompt = f"Answer the following question in about {word_limit} words:\n\nQuestion: {q}"
+            payload = {
+                "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a subject expert writing concise answers for student assignments."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                "max_tokens": 300,
+                "temperature": 0.7,
+                "top_p": 0.9
+            }
+
+            headers = {
+                "Authorization": f"Bearer {TOGETHER_API_KEY}",
+                "Content-Type": "application/json"
+            }
+
+            try:
+                response = requests.post(
+                    "https://api.together.xyz/v1/chat/completions",
+                    json=payload,
+                    headers=headers,
+                    timeout=30
+                )
+                result = response.json()
+                if 'choices' in result and result['choices']:
+                    answer = result['choices'][0]['message']['content'].strip()
+                    responses.append((q, answer))
+                else:
+                    responses.append((q, "⚠️ Could not generate answer."))
+            except Exception as e:
+                responses.append((q, f"❌ Error: {str(e)}"))
+
+        session['assignments'] = responses
+        session['flash'] = f"✅ {len(responses)} answers generated successfully!"
+        session.modified = True
+        return redirect(url_for('assignment'))
+
+    flash = session.pop('flash', None)
+    return render_template('assignment.html', answers=session.get('assignments', []), flash=flash)
+
+@app.route('/reset_assignment')
+def reset_assignment():
+    session.pop('assignments', None)
+    return redirect(url_for('assignment'))
+
+@app.route('/preview_assignment')
+def preview_assignment():
+    return render_template('assignment_preview.html', answers=session.get('assignments', []))
+
+@app.route('/generate_assignment_pdf')
+def generate_assignment_pdf():
+    html = render_template('assignment_pdf.html', answers=session.get('assignments', []))
+    result = BytesIO()
+    pisa.CreatePDF(html, dest=result)
+    response = make_response(result.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=Assignment_Answers.pdf'
+    return response
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0")

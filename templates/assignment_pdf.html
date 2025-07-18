@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 2cm;
+        }
+        h2 {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+        .qa-block {
+            margin-bottom: 40px;
+        }
+        .qa-block h4 {
+            font-size: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .qa-block p {
+            margin: 0 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Assignment Answers</h2>
+
+    {% for question, answer in answers %}
+        <div class="qa-block">
+            <h4>Q: {{ question }}</h4>
+            <p>{{ answer }}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>

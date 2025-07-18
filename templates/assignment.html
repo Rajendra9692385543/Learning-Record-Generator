@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Learning Record Generator</title>
+    <title>📝 Assignment Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap & Icons -->
@@ -13,24 +13,20 @@
         body {
             font-size: 1.05rem;
         }
-
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
+        textarea {
+            resize: vertical;
+            min-height: 150px;
         }
-
         footer {
             background-color: #f8f9fa;
             padding: 20px 0;
             border-top: 1px solid #ddd;
         }
-
         .footer-icon {
             font-size: 1.3rem;
             margin-right: 10px;
             color: #333;
         }
-
         /* Loader overlay */
         #loader {
             display: none;
@@ -44,7 +40,6 @@
             justify-content: center;
             align-items: center;
         }
-
         @media (max-width: 576px) {
             h2 {
                 font-size: 1.5rem;
@@ -61,54 +56,49 @@
         </div>
     </div>
 
-    <!-- Top Heading -->
-    <div class="container text-center mt-4">
-        <h2 class="fw-bold">🧠 Learning Record Generator</h2>
+    <!-- Header -->
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>📝 Assignment Generator</h2>
+            <nav>
+                <a href="/" class="btn btn-outline-primary me-2">🏠 Learning Records</a>
+                <a href="#contact" class="btn btn-outline-secondary">📬 Contact Us</a>
+            </nav>
+        </div>
+        <hr>
     </div>
 
-    <!-- Top Right Navbar -->
-    <nav class="navbar navbar-light">
-        <div class="container d-flex justify-content-end">
-            <a href="/assignment" class="btn btn-outline-primary me-2">✍️ Assignment</a>
-            <a href="#contact" class="btn btn-outline-secondary">📬 Contact Us</a>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container mt-3 mb-5">
-        <!-- Form -->
+    <!-- Form Section -->
+    <div class="container mb-5">
         <form method="POST" onsubmit="showLoader()">
             <div class="mb-3">
-                <label class="form-label">Enter Topic:</label>
-                <input type="text" name="topic" class="form-control" placeholder="e.g. Cloud Computing" required>
+                <label class="form-label">Enter Questions (separate each question by a new line):</label>
+                <textarea name="questions" class="form-control" placeholder="e.g. What is AI?&#10;Explain cloud computing." required></textarea>
             </div>
-            <div class="d-flex justify-content-between flex-wrap">
-                <div>
-                    <button type="submit" class="btn btn-success">➕ Add Topic</button>
-                    <a href="/preview" class="btn btn-primary ms-2">📄 Preview & Generate PDF</a>
-                </div>
-                <div>
-                    <a href="/reset" class="btn btn-danger">❌ Reset</a>
-                </div>
+            <div class="mb-3">
+                <label class="form-label">Word Limit (per answer):</label>
+                <input type="number" name="word_limit" class="form-control" placeholder="e.g. 50" required min="10">
             </div>
+            <button type="submit" class="btn btn-success">⚙️ Generate Answers</button>
+            <a href="/preview_assignment" class="btn btn-primary ms-2">📄 Preview PDF</a>
+            <a href="/reset_assignment" class="btn btn-danger float-end">❌ Reset</a>
         </form>
 
-        <!-- Flash Message -->
         {% if flash %}
         <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
             ✅ {{ flash }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         {% endif %}
 
-        <!-- Records -->
-        {% if records %}
+        {% if answers %}
         <hr>
-        <h5 class="mt-4">📝 Current Learning Records:</h5>
-        {% for record in records %}
+        <h5 class="mt-4">📋 Generated Answers:</h5>
+        {% for q, a in answers %}
         <div class="card my-3 shadow-sm">
             <div class="card-body">
-                <pre>{{ record }}</pre>
+                <strong>Q: {{ q }}</strong>
+                <p class="mt-2">{{ a }}</p>
             </div>
         </div>
         {% endfor %}
@@ -133,7 +123,7 @@
         </div>
     </footer>
 
-    <!-- Bootstrap & Loader Script -->
+    <!-- Bootstrap JS and Loader Script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function showLoader() {
