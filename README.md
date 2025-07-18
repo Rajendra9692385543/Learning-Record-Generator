@@ -43,10 +43,8 @@ Built with Flask (Python) for easy hosting and modification
 🧑‍💻 Self-learners documenting progress
 
 # 🚀 Deployment
-This app is ready to deploy on:
-
-Render
-
-Replit / Vercel (with small changes)
+This app is deployed on:
+Render 
+https://learning-record-generator-1.onrender.com
 
 Localhost (for offline use)
