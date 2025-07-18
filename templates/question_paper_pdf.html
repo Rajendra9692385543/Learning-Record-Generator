@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      font-family: "Times New Roman", serif;
+      font-size: 14px;
+      line-height: 1.6;
+      margin: 2cm;
+    }
+    h2 {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+    }
+    .record {
+      margin-bottom: 40px;
+    }
+    .record p {
+      margin: 0 0 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Solved Question Paper</h2>
+
+  {% for q, a in answers %}
+    <div class="record">
+      <p><strong>Q: {{ q }}</strong></p>
+      <p>{{ a }}</p>
+    </div>
+  {% endfor %}
+</body>
+</html>

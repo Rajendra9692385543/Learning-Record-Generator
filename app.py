@@ -4,6 +4,12 @@ import wikipedia
 from xhtml2pdf import pisa
 from io import BytesIO
 from datetime import datetime
+''' import os
+from werkzeug.utils import secure_filename
+from PIL import Image
+import pytesseract
+import fitz  # PyMuPDF '''
+
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # ✅ Required for using sessions
@@ -136,9 +142,6 @@ def index():
     flash_message = session.pop('flash', None)
     return render_template('index.html', records=session['records'], flash=flash_message)
 
-
-
-
 @app.route('/reset')
 def reset():
     session.pop('records', None)
@@ -242,6 +245,131 @@ def generate_assignment_pdf():
     response.headers['Content-Type'] = 'application/pdf'
     response.headers['Content-Disposition'] = 'inline; filename=Assignment_Answers.pdf'
     return response
+
+''' #Question Answering Logic
+
+# Required earlier in your app.py
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'pdf'}
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ------------------ Generate answers from extracted questions ------------------
+
+def generate_answers_from_questions(questions, word_limit=50):
+    all_qna = []
+    for q in questions:
+        prompt = f"Answer the following question in about {word_limit} words:\nQ: {q}"
+        payload = {
+            "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+            "messages": [
+                {"role": "system", "content": "You are an expert helping students answer academic questions."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 200,
+            "temperature": 0.7,
+            "top_p": 0.95
+        }
+        headers = {
+            "Authorization": f"Bearer {TOGETHER_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        try:
+            res = requests.post("https://api.together.xyz/v1/chat/completions", json=payload, headers=headers, timeout=30)
+            data = res.json()
+            answer = data['choices'][0]['message']['content'].strip()
+        except:
+            answer = "⚠️ Failed to generate answer."
+        all_qna.append((q, answer))
+    return all_qna
+
+
+# ------------------ Extract questions from image ------------------
+
+def extract_text_from_image(image_path):
+    img = Image.open(image_path)
+    text = pytesseract.image_to_string(img)
+    questions = [line.strip() for line in text.split("\n") if line.strip()]
+    return questions
+
+# ------------------ Extract from PDF ------------------
+
+def extract_text_from_pdf(pdf_path):
+    doc = fitz.open(pdf_path)
+    text = ""
+    for page in doc:
+        text += page.get_text()
+    questions = [line.strip() for line in text.split("\n") if line.strip()]
+    return questions
+
+
+# ------------------ Routes ------------------
+
+@app.route('/solve_paper', methods=['GET', 'POST'])
+def solve_paper():
+    if 'solved_qna' not in session:
+        session['solved_qna'] = []
+
+    if request.method == 'POST':
+        file = request.files['file']
+        word_limit = int(request.form.get('word_limit', 50))
+
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+
+            ext = filename.rsplit('.', 1)[1].lower()
+            if ext == 'pdf':
+                questions = extract_text_from_pdf(filepath)
+            else:
+                questions = extract_text_from_image(filepath)
+
+            if questions:
+                answers = generate_answers_from_questions(questions, word_limit)
+                session['solved_qna'] = answers
+                session.modified = True
+                session['flash'] = f"{len(answers)} questions processed successfully."
+            else:
+                session['flash'] = "No text found in the uploaded file."
+
+        return redirect(url_for('solve_paper'))
+
+    flash_msg = session.pop('flash', None)
+    return render_template('question_paper.html', answers=session.get('solved_qna', []), flash=flash_msg)
+
+
+@app.route('/reset_solve')
+def reset_solve():
+    session.pop('solved_qna', None)
+    return redirect(url_for('solve_paper'))
+
+
+@app.route('/preview_solve')
+def preview_solve():
+    qna = session.get('solved_qna', [])
+    return render_template('question_paper_preview.html', answers=qna)
+
+
+@app.route('/generate_solve_pdf')
+def generate_solve_pdf():
+    qna = session.get('solved_qna', [])
+    html = render_template('question_paper_pdf.html', answers=qna)
+    result = BytesIO()
+    pisa.CreatePDF(html, dest=result)
+    response = make_response(result.getvalue())
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename=Question_Paper_Solution.pdf'
+    return response '''
+
+@app.route('/coming-soon')
+def coming_soon():
+    return render_template('under_construction.html')
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0")

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🖼️ Solve Question Paper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-5">
+  <h2 class="mb-4 text-center">🖼️ Upload Question Paper</h2>
+
+  <form method="POST" enctype="multipart/form-data" onsubmit="showLoader()">
+    <div class="mb-3">
+      <label class="form-label">Upload Image or PDF:</label>
+      <input type="file" name="file" class="form-control" accept=".png,.jpg,.jpeg,.pdf" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Word Limit per Answer:</label>
+      <input type="number" name="word_limit" class="form-control" placeholder="e.g. 50" required min="10">
+    </div>
+    <button type="submit" class="btn btn-success">⚙️ Process & Generate</button>
+    <a href="/preview_solve" class="btn btn-primary ms-2">📄 Preview PDF</a>
+    <a href="/reset_solve" class="btn btn-danger float-end">❌ Reset</a>
+  </form>
+
+  {% if flash %}
+  <div class="alert alert-success alert-dismissible fade show mt-4" role="alert">
+    ✅ {{ flash }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endif %}
+
+  {% if answers %}
+  <hr>
+  <h5 class="mt-4">📋 Extracted & Solved:</h5>
+  {% for q, a in answers %}
+    <div class="card my-3 shadow-sm">
+      <div class="card-body">
+        <strong>Q: {{ q }}</strong>
+        <p class="mt-2">{{ a }}</p>
+      </div>
+    </div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+<script>
+function showLoader() {
+  const loader = document.createElement('div');
+  loader.id = 'loader';
+  loader.style.position = 'fixed';
+  loader.style.top = 0;
+  loader.style.left = 0;
+  loader.style.width = '100%';
+  loader.style.height = '100%';
+  loader.style.background = 'rgba(255,255,255,0.8)';
+  loader.style.zIndex = '9999';
+  loader.style.display = 'flex';
+  loader.style.justifyContent = 'center';
+  loader.style.alignItems = 'center';
+  loader.innerHTML = '<div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status"></div>';
+  document.body.appendChild(loader);
+}
+</script>
+</body>
+</html>
