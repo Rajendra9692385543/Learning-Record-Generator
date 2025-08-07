@@ -73,7 +73,7 @@ Only generate what's inside the lines above. Be concise, clear, and structured.
 """
 
     payload = {
-        "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "model": "meta-llama-3.3-70b-instruct-turbo",
         "messages": [
             {
                 "role": "system",
@@ -182,7 +182,7 @@ def assignment():
         for q in questions:
             prompt = f"Answer the following question in about {word_limit} words:\n\nQuestion: {q}"
             payload = {
-                "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+                "model": "meta-llama-3.3-70b-instruct-turbo",
                 "messages": [
                     {
                         "role": "system",
@@ -265,7 +265,7 @@ def generate_answers_from_questions(questions, word_limit=50):
     for q in questions:
         prompt = f"Answer the following question in about {word_limit} words:\nQ: {q}"
         payload = {
-            "model": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+            "model": "meta-llama-3.3-70b-instruct-turbo",
             "messages": [
                 {"role": "system", "content": "You are an expert helping students answer academic questions."},
                 {"role": "user", "content": prompt}
